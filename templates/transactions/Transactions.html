@@ -1,0 +1,69 @@
+{% extends "transactions/base.html" %}
+
+{% block title %}transactions{% endblock %}
+{% block content %}
+<style>
+  /* Personalizzazione del margine del div container */
+  .custom-container {
+    margin: 20px auto; /* Margin: 20px su tutti i lati, e auto per il margine orizzontale per centrare il contenitore */
+  }
+</style>
+
+<div class="custom-container">
+  <h1>Dashboard</h1>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="row">
+        <div class="col-md-6">
+          <h2>Expenses</h2>
+          <table class="table table-bordered table-responsive ">
+            <thead>
+              <tr>
+                <th class="col-2">Data</th>
+                <th>Amount</th>
+                <th>Description</th>
+                <th>Category</th> 
+              </tr>
+            </thead>
+            <tbody>
+              {% for expenditure in expenditures %}
+              <tr>
+                <td class="col-2">{{ expenditure.date }}</td>
+                <td>{{ expenditure.amount }}</td>
+                <td>{{ expenditure.description }}</td>
+                <td>{{ expenditure.type }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="col-md-6">
+          <h2>Earnings</h2>
+          <table class="table table-bordered table-responsive ">
+            <thead>
+              <tr>
+                <th class="col-2 ">Data</th>
+                <th>Amount</th>
+                <th>Description</th>
+                <th>Category</th> 
+              </tr>
+            </thead>
+            <tbody>
+              {% for income in incomes %}
+              <tr>
+                <td class="col-2 ">{{ income.date }}</td>
+                <td>{{ income.amount }}</td>
+                <td>{{ income.description }}</td>
+                <td>{{ income.type }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

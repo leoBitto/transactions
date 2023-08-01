@@ -1,0 +1,26 @@
+{% extends "transactions/base.html" %}
+
+{% block title %}Form{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <form action="{% url 'transactions:summary' %}" method="POST" class="mt-5">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="startDate" class="form-label text-primary">Start Date</label>
+          <input type="date" class="form-control" name="startDate" id="startDate" aria-describedby="dateHelp">
+          <div id="dateHelp" class="form-text">Enter the starting date of the transactions</div>
+        </div>
+        <div class="mb-3">
+          <label for="endDate" class="form-label text-primary">End Date</label>
+          <input type="date" class="form-control" name="endDate" id="endDate" aria-describedby="dateHelp">
+          <div id="dateHelp" class="form-text">Enter the ending date of the transactions</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
