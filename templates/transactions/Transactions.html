@@ -33,6 +33,39 @@
   </div>
   
 
+  <form method="post" action="{% url 'registrazione_transazione' %}">
+      {% csrf_token %}
+      <label for="date">Data:</label>
+      <input type="date" name="date" required><br>
+      
+      <label for="amount">Importo:</label>
+      <input type="number" step="0.01" name="amount" required><br>
+      
+      <label for="description">Descrizione:</label>
+      <input type="text" name="description" required><br>
+
+      <!-- Seleziona l'account bancario associato -->
+      <label for="bank_account">Account Bancario:</label>
+      <select name="bank_account">
+          <option value="" selected disabled>Seleziona un account</option>
+          {% for bank_account in bank_accounts %}
+              <option value="{{ bank_account.id }}">{{ bank_account.bank_name }}</option>
+          {% endfor %}
+      </select><br>
+      
+      <!-- Seleziona l'entità dei soldi contanti associata -->
+      <label for="cash">Entità Cash:</label>
+      <select name="cash">
+          <option value="" selected disabled>Seleziona un'entità Cash</option>
+          {% for cash_entity in cash_entities %}
+              <option value="{{ cash_entity.id }}">{{ cash_entity.amount }}</option>
+          {% endfor %}
+      </select><br>
+      
+      <button type="submit">Registra Transazione</button>
+  </form>
+
+
   <div class="row">
     <div class="col-md-12">
       <div class="row">

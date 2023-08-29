@@ -23,6 +23,7 @@ app_name = 'transactions'
 urlpatterns = [
     path('', views.base, name='base'),
     path('summary/', views.financial_summary, name='summary'),
+    path('transazione/', views.transaction_registration, name='transaction_registration'),
     #add the next two on main url file
     #path('login/', auth_views.LoginView.as_view(), name='login'),
     #path('logout/', auth_views.LogoutView.as_view(), name='logout'),

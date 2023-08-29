@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from .forms import TransactionForm
 from .models import *
 from django.contrib.auth.decorators import login_required
 import pandas as pd
@@ -60,10 +61,21 @@ def financial_summary(request):
         'fig_pie_expenditure':html_pie_expenditure,
         'fig_line_income':html_line_income,
         'fig_line_expenditure':html_line_expenditure,
+
     }
 
     # Restituisci la risposta rendendo il template 'transactions/Transactions.html'
     return render(request, 'transactions/Transactions.html', context)
+
+
+def transaction_registration(request):
+    if request.method == 'POST':
+        form = TransactionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('financial_summary')  # Redirect alla dashboard dopo aver salvato i dati
+
+    return render(request, 'registrazione_transazione.html', {'form': form})
 
 
 
