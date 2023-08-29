@@ -9,8 +9,29 @@
   }
 </style>
 
-<div class="custom-container">
+<div class="custom-container m-4">
   <h1>Dashboard</h1>
+
+  <div class="row">
+    <div class="col-md-6">
+        {{ fig_pie_income | safe }}
+    </div>
+    
+    <div class="col-md-6">
+        {{ fig_pie_expenditure | safe }}
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-md-6">
+        {{ fig_line_income | safe }}
+    </div>
+    
+    <div class="col-md-6">
+        {{ fig_line_expenditure | safe }}
+    </div>
+  </div>
+  
 
   <div class="row">
     <div class="col-md-12">

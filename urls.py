@@ -17,12 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from transactions import views
-from django.contrib.auth import views as auth_views
+#from django.contrib.auth import views as auth_views
 
+app_name = 'transactions'
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('', views.base, name='base'),
     path('summary/', views.financial_summary, name='summary'),
-    path('login/', auth_views.LoginView.as_view(), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    #add the next two on main url file
+    #path('login/', auth_views.LoginView.as_view(), name='login'),
+    #path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 ]

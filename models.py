@@ -17,6 +17,8 @@ class Income(Transaction):
     ]
     type=models.CharField(choices=Choices, max_length=10)
 
+    def __str__(self):
+        return f"Income: {self.amount} on {self.date}"
 
 
 class Expenditure(Transaction):
@@ -33,3 +35,6 @@ class Expenditure(Transaction):
         ('Other','Other'),
     ]
     type=models.CharField(choices=Choices, max_length=16)
+
+    def __str__(self):
+        return f"Expenditure: {self.amount} on {self.date}"
