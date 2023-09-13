@@ -1,26 +1,102 @@
-{% extends "transactions/base.html" %}
+{% extends "website/base.html" %}
 
 {% block title %}Form{% endblock %}
 
 {% block content %}
+<style>
+/* Stilizza le spese urgenti in rosso */
+.list-group-item-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+</style>
+
+
 <div class="container">
   <div class="row justify-content-center">
     <div class="col-md-6">
-      <form action="{% url 'transactions:summary' %}" method="POST" class="mt-5">
+      <form action="{% url 'transactions:financial_summary' %}" method="POST" class="mt-5 row">
         {% csrf_token %}
-        <div class="mb-3">
+        <div class="col-md-6 mb-3">
           <label for="startDate" class="form-label text-primary">Start Date</label>
           <input type="date" class="form-control" name="startDate" id="startDate" aria-describedby="dateHelp">
           <div id="dateHelp" class="form-text">Enter the starting date of the transactions</div>
         </div>
-        <div class="mb-3">
+        <div class="col-md-6 mb-3">
           <label for="endDate" class="form-label text-primary">End Date</label>
           <input type="date" class="form-control" name="endDate" id="endDate" aria-describedby="dateHelp">
           <div id="dateHelp" class="form-text">Enter the ending date of the transactions</div>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="col-12 btn btn-primary">Submit</button>
       </form>
     </div>
   </div>
 </div>
+
+{% if future_expenses %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <h2 class="text-center mb-4">Future Expenses</h2>
+      <ul class="list-group">
+        {% for future_expense in future_expenses %}
+          <li class="list-group-item {% if future_expense.is_urgent %}list-group-item-danger{% endif %}">
+            {{ future_expense.amount }} - {{ future_expense.description }} - {{ future_expense.date }}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endif %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <h2 class="text-center mb-4">Bank Accounts & Cash</h2>
+      <div class="card" style="width: 12rem;">
+        <div class="card-body">
+          <h5 class="card-title">Cash</h5>
+          <p class="card-text">Amount: {{ cash.amount }}</p>
+          <a href="{% url 'transactions:cash_detail' pk=cash.pk %}" class="btn btn-primary">Go to Cash</a>
+        </div>
+      </div>
+      {% for bank_account in bank_accounts %}
+      <div class="card" style="width: 12rem;">
+        <div class="card-body">
+          <h5 class="card-title">{{ bank_account.bank_name }}</h5>
+          <p class="card-text">Balance: {{ bank_account.balance }}</p>
+          <a href="{% url 'transactions:bank_detail' pk=bank_account.pk %}" class="btn btn-primary">Go to Bank Account</a>
+        </div>
+      </div>
+      {% endfor %}
+      <div class="card mt-4">
+        <div class="card-body">
+          <h5 class="card-title">Total Savings</h5>
+          <p class="card-text">Amount: {{ total_savings }}</p>
+        </div>
+      </div>
+
+  </div>
+</div>
+
+
+<script>
+  // Ottieni l'elemento "Start Date"
+  const startDateInput = document.getElementById('startDate');
+  
+  // Ottieni l'elemento "End Date"
+  const endDateInput = document.getElementById('endDate');
+
+  // Crea una data per l'inizio dell'anno corrente
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const firstDayOfYear = new Date(currentYear, 0, 1);
+
+  // Imposta il valore dell'input "Start Date" con la data di inizio anno
+  startDateInput.valueAsDate = firstDayOfYear;
+
+  // Imposta il valore dell'input "End Date" con la data odierna
+  endDateInput.valueAsDate = currentDate;
+</script>
+
 {% endblock %}

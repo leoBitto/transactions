@@ -1,0 +1,130 @@
+{% extends "website/base.html" %}
+
+{% block title %}Create Recurring Transaction{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <form action="{% url 'transactions:recurring_transaction' %}" method="POST">
+        {% csrf_token %}
+        <!-- Aggiungi i campi del form per creare transazioni ricorrenti -->
+        <div class="mb-3">
+          <label for="amount" class="form-label">Amount</label>
+          <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
+          <small id="amountHelp" class="form-text text-muted">Enter the amount (e.g., 100.00)</small>
+        </div>
+        <div class="mb-3">
+          <label for="description" class="form-label">Description</label>
+          <input type="text" class="form-control" id="description" name="description">
+          <small id="descriptionHelp" class="form-text text-muted">Add a brief description</small>
+        </div>
+
+        <div class="mb-3">
+          <label for="frequency" class="form-label">Frequency</label>
+          <select class="form-select" id="frequency" name="frequency" required>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="annualy">Annualy</option>
+          </select>
+          <small id="frequencyHelp" class="form-text text-muted">Add a frequency</small>
+        </div>
+        
+        <!-- Campo per il metodo di pagamento -->
+        <div class="mb-3">
+            <label for="payment_method" class="form-label">Payment Method</label>
+            <select class="form-select" id="payment_method" name="payment_method">
+                <option value="" disabled selected>Select Payment Method</option>
+                {% for bank_account in bank_accounts %}
+                    <option value="{{ bank_account.pk }}">Bank Account - {{ bank_account.bank_name }} - {{ bank_account.balance }}</option>
+                {% endfor %}
+                <option value="cash">Cash: {{ cash_entity.amount }} Euros</option>
+            </select>
+            <small id="payment_methodHelp" class="form-text text-muted">Where the money will come from</small>
+        </div>
+
+
+        <!-- Aggiungi gli input per start_date e end_date -->
+        <div class="mb-3">
+            <label for="start_date" class="form-label">Start Date</label>
+            <input type="date" class="form-control" id="start_date" name="start_date" required>
+            <small id="start_dateHelp" class="form-text text-muted">Start date of payment</small>
+        </div>
+        <div class="mb-3">
+            <label for="end_date" class="form-label">End Date</label>
+            <input type="date" class="form-control" id="end_date" name="end_date" >
+            <small id="end_dateHelp" class="form-text text-muted">End date of payment</small>
+        </div>
+        
+        <!-- input per decidere se income o expenditure e la tipologia -->
+        <div class="mb-3">
+            <label for="type" class="form-label">Type</label>
+            <select class="form-select" id="type" name="type">
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+            </select>
+
+        </div>
+        <div class="mb-3" id="income_type_div">
+            <label for="income_type" class="form-label">Income Type</label>
+            <select class="form-select" id="income_type" name="income_type">
+                {% for value, label in income_choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3" id="expenditure_type_div" style="display: none;">
+            <label for="expenditure_type" class="form-label">Expenditure Type</label>
+            <select class="form-select" id="expenditure_type" name="expenditure_type">
+                {% for value, label in expenditure_choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+
+
+        <button type="submit" class="btn btn-primary">Create Recurring Transaction</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="fixed-bottom fixed-start p-3">
+  <a href="{% url 'transactions:base' %}" class="btn btn-primary">Back to Main Page</a>
+</div>
+
+<!-- Metti questo script all'interno del tuo file HTML -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var typeSelect = document.getElementById('type');
+    var incomeTypeDiv = document.getElementById('income_type_div');
+    var expenditureTypeDiv = document.getElementById('expenditure_type_div');
+
+    function hide(element) {
+        element.style.display = 'none';
+    }
+
+    function show(element) {
+        element.style.display = 'block';
+    }
+
+    typeSelect.addEventListener('change', function() {
+        if (this.value === 'income') {
+            show(incomeTypeDiv);
+            hide(expenditureTypeDiv);
+        } else if (this.value === 'expense') {
+            hide(incomeTypeDiv);
+            show(expenditureTypeDiv);
+        } else {
+            hide(incomeTypeDiv);
+            hide(expenditureTypeDiv);
+        }
+    });
+});
+</script>
+
+
+{% endblock %}

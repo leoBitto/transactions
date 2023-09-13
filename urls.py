@@ -22,8 +22,11 @@ from transactions import views
 app_name = 'transactions'
 urlpatterns = [
     path('', views.base, name='base'),
-    path('summary/', views.financial_summary, name='summary'),
-    path('transazione/', views.transaction_registration, name='transaction_registration'),
+    path('summary/', views.financial_summary, name='financial_summary'),
+    path('register/', views.transaction_registration, name='transaction_registration'),
+    path('bank/<int:pk>/', views.bank_detail, name='bank_detail'), 
+    path('cash/<int:pk>/', views.cash_detail, name='cash_detail'), 
+    path('create_recurring_transaction/', views.create_recurring_transaction, name='recurring_transaction'),
     #add the next two on main url file
     #path('login/', auth_views.LoginView.as_view(), name='login'),
     #path('logout/', auth_views.LogoutView.as_view(), name='logout'),

@@ -1,0 +1,84 @@
+{% extends "website/base.html" %}
+
+{% block title %}Bank Account Detail{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      {% if messages %}
+        <div class="alert alert-dismissible fade show" role="alert">
+          <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+          </ul>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endif %}
+
+      <div class="card">
+          <div class="card-body">
+              <h5 class="card-title">{{ bank_account.bank_name }}</h5>
+              <p class="card-text">
+                Balance: <span id="bank-balance-{{ bank_account.pk }}">{{ bank_account.balance }}</span>
+              </p>
+          </div>
+      </div>
+      <div class="row mt-4">
+        <div class="col-md-6 mb-4">
+          <form method="post" id="transferForm" target="_self">
+            <h4>Transfer Funds</h4>
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="target_account" class="form-label">Target Account:</label>
+                <select class="form-select" id="target_account" name="target_account" required>
+                    {% for bank_account in bank_accounts %}
+                        <option value="{{ bank_account.bank_name }}">{{ bank_account.bank_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="amount" class="form-label">Amount:</label>
+                <input type="number" class="form-control" id="amount" name="amount" required>
+            </div>
+            <div class="mb-3">
+                <label for="commission" class="form-label">Commission:</label>
+                <input type="number" class="form-control" id="commission" name="commission" required>
+            </div>
+            <button type="submit" class="btn btn-primary" name="transfer_button">Transfer</button>
+          </form>
+        </div>
+        <div class="col-md-6">
+          <form method="post" id="retireForm" target="_self">
+            <h4>Retire Funds</h4>
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="retire_amount" class="form-label">Amount:</label>
+                <input type="number" class="form-control" id="retire_amount" name="retire_amount" required>
+            </div>
+            <div class="mb-3">
+                <label for="retire_commission" class="form-label">Commission:</label>
+                <input type="number" class="form-control" id="retire_commission" name="retire_commission" required>
+            </div>
+            <button type="submit" class="btn btn-primary" name="retire_button">Retire</button>
+          </form>
+        </div>
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+<div class=" d-flex justify-content-center">
+    {{ html_fig | safe }}
+</div>
+
+<div class="fixed-bottom fixed-start p-3">
+  <a href="{% url 'transactions:base' %}" class="btn btn-primary">Back to Main Page</a>
+</div>
+
+
+
+{% endblock %}
