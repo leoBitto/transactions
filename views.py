@@ -222,6 +222,15 @@ def bank_detail(request, pk):
             amount = Decimal(request.POST.get('amount'))
             commission = Decimal(request.POST.get('commission'))
             
+            # crea una expenditure per la commissione
+            Expenditure.objects.create(
+                type = 'Other',
+                date=date.today(),
+                amount=commission,
+                bank_account=bank_account,
+                description='commissione',
+                )
+
             try:
                 target_account = BankAccount.objects.get(bank_name=target_account_name)
             except BankAccount.DoesNotExist:
@@ -235,7 +244,14 @@ def bank_detail(request, pk):
         elif 'retire_button' in request.POST:
             retire_amount = Decimal(request.POST.get('retire_amount'))
             retire_commission = Decimal(request.POST.get('retire_commission'))
-            
+            # crea una expenditure per la commissione
+            Expenditure.objects.create(
+                type = 'Other',
+                date=date.today(),
+                amount=retire_commission,
+                bank_account=bank_account,
+                description='commissione',
+                )
             if bank_account.withdraw_money(retire_amount, retire_commission):
                 messages.success(request, 'Il ritiro è avvenuto con successo.')
             else:
@@ -247,7 +263,7 @@ def bank_detail(request, pk):
     balance_logs = BalanceLog.objects.filter(bank_account=bank_account)
 
     df = pd.DataFrame(list(balance_logs.values()))
-    print(df)
+   
     # Verifica se il DataFrame df è vuoto
     if not df.empty:
         fig = px.line(df, x='timestamp', y='balance', title='Balance Over Time')
