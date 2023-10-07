@@ -83,12 +83,12 @@ def financial_summary(request):
         html_line_expenditure = "No expenditure data available"
 
 
-    logger.debug("start_date: %s", start_date)
-    logger.debug("end_date: %s", end_date)
-    logger.debug("incomes: %s", incomes)
-    logger.debug("expenditures: %s", expenditures)
-    logger.debug("incomes_df: %s", incomes_df)
-    logger.debug("expenditures_df: %s", expenditures_df)
+    # logger.debug("start_date: %s", start_date)
+    # logger.debug("end_date: %s", end_date)
+    # logger.debug("incomes: %s", incomes)
+    # logger.debug("expenditures: %s", expenditures)
+    # logger.debug("incomes_df: %s", incomes_df)
+    # logger.debug("expenditures_df: %s", expenditures_df)
 
     context = {
         'incomes': incomes,
