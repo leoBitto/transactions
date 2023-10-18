@@ -291,6 +291,35 @@ def cash_detail(request, pk):
 
     amount_logs = AmountLog.objects.all()
 
+    deposit_form = DepositForm()  # Aggiungi questa linea per istanziare il form
+
+    if request.method == 'POST':
+        deposit_form = DepositForm(request.POST)  # Ottieni i dati dal form
+
+        if deposit_form.is_valid():
+            amount = deposit_form.cleaned_data['amount']
+            bank_account = deposit_form.cleaned_data['bank_account']
+
+            # Crea una transazione di deposito nel conto bancario
+            Transaction.objects.create(
+                date=date.today(),
+                amount=amount,
+                description='Deposito cash',
+                bank_account=bank_account
+            )
+
+            # Aggiorna l'entità Cash
+            cash_account.amount -= amount
+            cash_account.save()
+
+            # Aggiorna il saldo del conto bancario
+            bank_account.balance += amount
+            bank_account.save()
+
+            messages.success(request, 'Il deposito è avvenuto con successo.')
+            return redirect('transactions:cash_detail', pk=pk)
+
+
     df = pd.DataFrame(list(amount_logs.values()))
 
     # Verifica se il DataFrame df è vuoto
@@ -308,6 +337,8 @@ def cash_detail(request, pk):
     context = {
         'cash_account': cash_account,
         'html_fig':html_fig,
+        'deposit_form': deposit_form,  # Passa il form al contesto del template
+
         }
 
     return render(request, 'transactions/cash_detail.html', context)

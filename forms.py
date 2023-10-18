@@ -34,3 +34,6 @@ class ExpenditureForm(forms.ModelForm):
         fields = ['date', 'amount', 'description', 'type', 'bank_account', 'cash']
 
 
+class DepositForm(forms.Form):
+    amount = forms.DecimalField(max_digits=10, decimal_places=2)
+    bank_account = forms.ModelChoiceField(queryset=BankAccount.objects.all())
