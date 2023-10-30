@@ -12,40 +12,41 @@
     </ul>
 </div>
 {% endif %}
-
-<style>
-  /* Personalizzazione del margine del div container */
-  .custom-container {
-    margin: 20px auto; /* Margin: 20px su tutti i lati, e auto per il margine orizzontale per centrare il contenitore */
-  }
-</style>
-
-<div class="custom-container m-4 ">
-    <h1>Dashboard</h1>
-
-    <div class="row">
-        <div class="col-md-6">
-            {{ fig_pie_income | safe }}
+<div class="container">
+    <h1 class="text-center">Dashboard</h1>
+    <div class="container mx-4">
+        
+        <div class=" row mt-3">
+            <div class="col-md-6">
+                {{ fig_pie_income | safe }}
+            </div>
+            
+            <div class="col-md-6">
+                {{ fig_pie_expenditure | safe }}
+            </div>
         </div>
         
-        <div class="col-md-6">
-            {{ fig_pie_expenditure | safe }}
+        <div class=" row  mt-3">
+            <div class="col-md-6">
+                {{ fig_line_income | safe }}
+            </div>
+            
+            <div class="col-md-6">
+                {{ fig_line_expenditure | safe }}
+            </div>
         </div>
     </div>
-    
-    <div class="row">
-        <div class="col-md-6">
-            {{ fig_line_income | safe }}
-        </div>
-        
-        <div class="col-md-6">
-            {{ fig_line_expenditure | safe }}
-        </div>
-    </div>
-  
 
-    <div class="row">
-        <div class="col-md-4 mx-auto">
+    <div class="d-flex flex-column flex-sm-row justify-content-around">
+
+        <!-- Button per aprire il form income-->
+        <button class="btn btn-primary mt-3" type="button" data-bs-toggle="collapse" data-bs-target="#addIncome" aria-expanded="false" aria-controls="addIncome">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+            <path d="M8 1a.5.5 0 0 1 .5.5V7h5.5a.5.5 0 0 1 0 1H8V14.5a.5.5 0 0 1-1 0V8H1.5a.5.5 0 0 1 0-1H7V1.5A.5.5 0 0 1 7.5 1zm0 1.8a.7.7 0 0 0-.7.7V7H2.8a.7.7 0 0 0-.7.7v.6a.7.7 0 0 0 .7.7h4.5v4.5a.7.7 0 0 0 .7.7h.6a.7.7 0 0 0 .7-.7V9h4.5a.7.7 0 0 0 .7-.7v-.6a.7.7 0 0 0-.7-.7H8V2.5a.7.7 0 0 0-.7-.7z"/>
+            </svg>
+            Toggle Income form
+        </button>
+        <div class="col-md-4 mx-auto collapse"  id="addIncome">
             <!-- Form for Income Registration -->
             <form method="post" action="{% url 'transactions:transaction_registration' %}" class="mb-3">
                 {% csrf_token %}
@@ -79,8 +80,14 @@
             </form>
         </div>
 
-
-        <div class="col-md-4 mx-auto">
+        <!-- Button per aprire il form Expense-->
+        <button class="btn btn-primary mt-3" type="button" data-bs-toggle="collapse" data-bs-target="#addExpense" aria-expanded="false" aria-controls="addExpense">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+            <path d="M8 1a.5.5 0 0 1 .5.5V7h5.5a.5.5 0 0 1 0 1H8V14.5a.5.5 0 0 1-1 0V8H1.5a.5.5 0 0 1 0-1H7V1.5A.5.5 0 0 1 7.5 1zm0 1.8a.7.7 0 0 0-.7.7V7H2.8a.7.7 0 0 0-.7.7v.6a.7.7 0 0 0 .7.7h4.5v4.5a.7.7 0 0 0 .7.7h.6a.7.7 0 0 0 .7-.7V9h4.5a.7.7 0 0 0 .7-.7v-.6a.7.7 0 0 0-.7-.7H8V2.5a.7.7 0 0 0-.7-.7z"/>
+            </svg>
+            Toggle Expense form
+        </button>
+        <div class="col-md-4 mx-auto collapse" id="addExpense">
             <!-- Form for Expense Registration -->
             <form method="post" action="{% url 'transactions:transaction_registration' %}" class="mb-3">
                 {% csrf_token %}
@@ -114,23 +121,22 @@
             </form>
         </div>
     </div>
-     <div class="row justify-content-center">
+
+    <div class="row justify-content-center m-3">
         <a href="{% url 'transactions:recurring_transaction' %}" class="col-md-6 btn btn-primary mx-auto">Create Recurring Transaction</a>
     </div>
-</div>
+    
 
-
-  <div class="row">
-    <div class="col-md-12">
-        <div class="row">
-            <div class="col-md-6">
-                <h2>Income</h2>
-                <table id="income-table" class="table table-bordered table-responsive">
+    <div class="col-lg-12 mt-2">
+        <div class="d-lg-flex justify-content-between">
+            <div class="w-100">
+                <h2 class="text-center">Income</h2>
+                <table id="income-table" class="table table-bordered table-responsive m-1">
                     <thead>
                         <tr>
                             <th class="col-2">Data</th>
                             <th>Amount</th>
-                            <th>Description</th>
+                            <th class="d-none d-md-table-cell">Description</th>
                             <th>Category</th>
                         </tr>
                     </thead>
@@ -139,21 +145,21 @@
                         <tr>
                             <td class="col-2">{{ income.date }}</td>
                             <td>{{ income.amount }}</td>
-                            <td>{{ income.description }}</td>
+                            <td class="d-none d-md-table-cell">{{ income.description }}</td>
                             <td>{{ income.type }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-            <div class="col-md-6">
-                <h2>Expenses</h2>
-                <table id="expenses-table" class="table table-bordered table-responsive">
+            <div class="w-100">
+                <h2 class="text-center">Expenses</h2>
+                <table id="expenses-table" class="table table-bordered table-responsive m-1">
                     <thead>
                         <tr>
                             <th class="col-2">Data</th>
                             <th>Amount</th>
-                            <th>Description</th>
+                            <th class="d-none d-md-table-cell">Description</th>
                             <th>Category</th>
                         </tr>
                     </thead>
@@ -162,7 +168,7 @@
                         <tr>
                             <td class="col-2">{{ expenditure.date }}</td>
                             <td>{{ expenditure.amount }}</td>
-                            <td>{{ expenditure.description }}</td>
+                            <td class="d-none d-md-table-cell">{{ expenditure.description }}</td>
                             <td>{{ expenditure.type }}</td>
                         </tr>
                         {% endfor %}
@@ -171,16 +177,12 @@
             </div>
         </div>
     </div>
+
+
+    <div class="fixed-bottom fixed-start p-3">
+        <a href="{% url 'transactions:base' %}" class="btn btn-primary">Back to Main Page</a>
+    </div>
 </div>
-
-</div>
-
-<div class="fixed-bottom fixed-start p-3">
-  <a href="{% url 'transactions:base' %}" class="btn btn-primary">Back to Main Page</a>
-</div>
-
-
-
 
 <script>
 $(document).ready(function() {

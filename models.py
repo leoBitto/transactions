@@ -88,6 +88,12 @@ class Transaction(models.Model):
     def __str__(self):
         return f"Transaction: {self.amount} on {self.date}"
 
+    def save(self, *args, **kwargs):
+        # Implementa una regola di business (ad esempio, verifica che l'importo sia positivo)
+        if self.amount <= 0:
+            raise ValueError("L'importo deve essere maggiore di zero.")
+        
+        super().save(*args, **kwargs)
 
 class Income(Transaction):
     Choices =[
