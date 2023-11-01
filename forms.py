@@ -37,3 +37,17 @@ class ExpenditureForm(forms.ModelForm):
 class DepositForm(forms.Form):
     amount = forms.DecimalField(max_digits=10, decimal_places=2)
     bank_account = forms.ModelChoiceField(queryset=BankAccount.objects.all())
+
+
+class AddBankForm(forms.Form):
+    bank_name = forms.CharField()
+    balance = forms.DecimalField(max_digits=10, decimal_places=2)
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+        
+
+
+
+
+
+
+

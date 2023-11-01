@@ -3,49 +3,47 @@
 {% block title %}Cash Account Detail{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Cash Account</h5>
-          <p class="card-text">Amount: {{ cash_account.amount }}</p>
-        </div>
+<div id="notification-container" class="position-fixed top-0 end-0 p-3" style="z-index: 5">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-primary alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
+    {% endfor %}
+  {% endif %}
+</div>
+
+<div class="container mt-5 px-2 d-flex justify-content-center flex-column">
+  
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Cash</h5>
+      <p class="card-text">Amount: {{ cash_account.amount }}</p>
     </div>
+  </div>
+  
+  <div class="col-12">  
+    {{ html_fig | safe }}
+  </div>
+  
+  
+  <div class="col-md-6 p-2 mt-4">
+    <h2>Cash deposit </h2>
+    <form method="post" class="justify-content-center" >
+      {% csrf_token %}
+      <div class="mb-3">
+        {{ deposit_form.amount.label_tag }} 
+        {{ deposit_form.amount }}
+      </div>
+      <div class="mb-3">
+        {{ deposit_form.bank_account.label_tag }} 
+        {{ deposit_form.bank_account }}
+      </div>
+      <button type="submit" class="btn btn-primary">Deposit</button>
+    </form>
   </div>
 
-  <div class="row justify-content-center mt-4">
-    <div class="col-md-6">
-      <h2>Deposito Cash</h2>
-      <form method="post" class="needs-validation" novalidate>
-        {% csrf_token %}
-        <div class="mb-3">
-          {{ deposit_form.amount.label_tag }} 
-          {{ deposit_form.amount }}
-          <div class="invalid-feedback">
-            Inserisci un importo valido.
-          </div>
-        </div>
-        <div class="mb-3">
-          {{ deposit_form.bank_account.label_tag }} 
-          {{ deposit_form.bank_account }}
-          <div class="invalid-feedback">
-            Seleziona un conto bancario.
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary">Deposita</button>
-      </form>
-    </div>
-  </div>
-
-  <div class="row justify-content-center mt-4">
-    <div class="col-md-6">
-      <div class="d-flex justify-content-center">
-        {{ html_fig | safe }}
-      </div>
-    </div>
-  </div>
 
   <div class="row justify-content-center mt-4">
     <div class="col-md-6">

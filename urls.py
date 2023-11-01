@@ -25,6 +25,7 @@ urlpatterns = [
     path('summary/', views.financial_summary, name='financial_summary'),
     path('register/', views.transaction_registration, name='transaction_registration'),
     path('bank/<int:pk>/', views.bank_detail, name='bank_detail'), 
+    path('add_bank/', views.add_bank, name='add_bank'), 
     path('cash/<int:pk>/', views.cash_detail, name='cash_detail'), 
     path('create_recurring_transaction/', views.create_recurring_transaction, name='recurring_transaction'),
     #add the next two on main url file

@@ -41,17 +41,31 @@ def financial_summary(request):
     expenditures_data = list(expenditures.values('date', 'amount', 'type'))
     expenditures_df = pd.DataFrame(expenditures_data)
 
+    #definisci dei colori per le categorie di spesa:
+    income_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']  
+    expense_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
+
+
     # Verifica se ci sono dati validi per i grafici
     if not incomes_df.empty:
         # Crea e visualizza il grafico a torta per le categorie di entrate
-        fig_pie_income = px.pie(incomes_df, names='type', values='amount', title='Distribution of Income Categories')
+        fig_pie_income = px.pie(incomes_df, names='type', values='amount', title='Income Categories',color='type',
+                        color_discrete_sequence=income_colors)
+        fig_pie_income.update_layout(
+            legend=dict(x=0, y=0, traceorder='normal', font=dict(family='sans-serif', size=12, color='black'))
+        )
+
         html_pie_income = pio.to_html(fig_pie_income)
     else:
         html_pie_income = "No income data available"
 
     if not expenditures_df.empty:
         # Crea e visualizza il grafico a torta per le categorie di uscite
-        fig_pie_expenditure = px.pie(expenditures_df, names='type', values='amount', title='Distribution of Expenditure Categories')
+        fig_pie_expenditure = px.pie(expenditures_df, names='type', values='amount', title='Expenses Categories',color='type',
+                        color_discrete_sequence=expense_colors)
+        fig_pie_expenditure.update_layout(
+            legend=dict(x=0, y=0, traceorder='normal', font=dict(family='sans-serif', size=12, color='black'))
+        )
         html_pie_expenditure = pio.to_html(fig_pie_expenditure)
     else:
         html_pie_expenditure = "No expenditure data available"
@@ -61,10 +75,15 @@ def financial_summary(request):
         total_incomes_per_day = incomes_df.groupby('date')['amount'].sum().reset_index()
 
         # Crea e visualizza il grafico a linee per le entrate nel tempo
-        fig_line_income = px.line(incomes_df, x='date', y='amount', color='type', title='Income Over Time')
+        fig_line_income = px.line(incomes_df, x='date', y='amount', color='type', title='Income Over Time', color_discrete_sequence=income_colors)
         # Aggiungi la linea delle entrate totali
         fig_line_income.add_trace(go.Scatter(x=total_incomes_per_day['date'], y=total_incomes_per_day['amount'],
                                      mode='lines+markers', name='Total Income'))
+        # Aggiorna il layout per spostare la legenda all'interno del grafico
+        fig_line_income.update_layout(
+            legend=dict(x=0, y=-1, traceorder='normal', font=dict(family='sans-serif', size=12, color='black'))
+        )
+
         html_line_income = pio.to_html(fig_line_income)
     else:
         html_line_income = "No income data available"
@@ -74,10 +93,15 @@ def financial_summary(request):
         total_expenses_per_day = expenditures_df.groupby('date')['amount'].sum().reset_index()
 
         # Crea e visualizza il grafico a linee per le entrate nel tempo
-        fig_line_expenditure = px.line(expenditures_df, x='date', y='amount', color='type', title='Expenses Over Time')
+        fig_line_expenditure = px.line(expenditures_df, x='date', y='amount', color='type', title='Expenses Over Time', color_discrete_sequence=expense_colors)
         # Aggiungi la linea delle entrate totali
         fig_line_expenditure.add_trace(go.Scatter(x=total_expenses_per_day['date'], y=total_expenses_per_day['amount'],
                                      mode='lines+markers', name='Total Expenses'))
+        # Aggiorna il layout per spostare la legenda all'interno del grafico
+        fig_line_expenditure.update_layout(
+            legend=dict(x=0, y=-1, traceorder='normal', font=dict(family='sans-serif', size=12, color='black'))
+        )
+
         html_line_expenditure = pio.to_html(fig_line_expenditure)
     else:
         html_line_expenditure = "No expenditure data available"
@@ -90,7 +114,20 @@ def financial_summary(request):
     # logger.debug("incomes_df: %s", incomes_df)
     # logger.debug("expenditures_df: %s", expenditures_df)
 
+     # Ottieni gli account bancari e l'entità Cash dal database
+    bank_accounts = BankAccount.objects.all()
+    cash_entity = Cash.objects.all()[0]  # Assumendo che ci sia solo un oggetto Cash nel database
+
+    income_choices = Income.Choices
+    expenditure_choices = Expenditure.Choices
+
     context = {
+
+        'bank_accounts': bank_accounts, 
+        'cash_entity': cash_entity,
+        'income_choices': income_choices,
+        'expenditure_choices': expenditure_choices,
+
         'incomes': incomes,
         'expenditures': expenditures,
         'fig_pie_income':html_pie_income,
@@ -101,9 +138,10 @@ def financial_summary(request):
         'expenditure_form': ExpenditureForm(),
         'today': date.today().strftime('%Y-%m-%d')
     }
+        
 
     # Restituisci la risposta rendendo il template 'transactions/Transactions.html'
-    return render(request, 'transactions/Transactions.html', context)
+    return render(request, 'transactions/transactions.html', context)
 
 
 @login_required
@@ -198,18 +236,23 @@ def base(request):
             expense.is_urgent = True
 
     bank_accounts = BankAccount.objects.all()
-    cash = Cash.objects.all()[0]
-    
-    total_savings = sum([account.balance for account in bank_accounts]) + cash.amount
+    cash = Cash.objects.first()
+    if cash is not None:
+        total_savings = sum([account.balance for account in bank_accounts]) + cash.amount
+    else:
+        total_savings = sum([account.balance for account in bank_accounts]) 
 
+    add_bank_form = AddBankForm()
     context = {
         'future_expenses':future_expenses,
         'cash':cash,
         'bank_accounts': bank_accounts,
         'total_savings': total_savings,
+        'add_bank_form': add_bank_form,
+        
     }
     
-    return render(request, 'transactions/form.html', context)
+    return render(request, 'transactions/overview.html', context)
 
 @login_required
 def bank_detail(request, pk):
@@ -284,6 +327,24 @@ def bank_detail(request, pk):
 
     return render(request, 'transactions/bank_detail.html', context)
 
+@login_required
+def add_bank(request):
+    if request.method == 'POST':
+        bank_form = AddBankForm(request.POST)
+        if bank_form.is_valid():
+            bank_name = bank_form.cleaned_data['bank_name']
+            balance = bank_form.cleaned_data['balance']
+            start_date = bank_form.cleaned_data['start_date']
+
+            BankAccount.objects.create(
+                bank_name = bank_name,
+                balance = balance,
+                start_date = start_date,
+            )
+
+
+    return redirect("transactions:base")
+
 
 @login_required
 def cash_detail(request, pk):
@@ -351,8 +412,6 @@ def create_recurring_transaction(request):
     bank_accounts = BankAccount.objects.all()
     cash_entity = Cash.objects.all()[0]  # Assumendo che ci sia solo un oggetto Cash nel database
 
-    income_choices = Income.Choices
-    expenditure_choices = Expenditure.Choices
 
     if request.method == 'POST':
         form = RecurringTransactionForm(request.POST)
@@ -449,11 +508,5 @@ def create_recurring_transaction(request):
     else:
         form = RecurringTransactionForm()
 
-    context = {
-        'form': form, 
-        'bank_accounts': bank_accounts, 
-        'cash_entity': cash_entity,
-        'income_choices': income_choices,
-        'expenditure_choices': expenditure_choices
-        }
-    return render(request, 'transactions/recurring_transaction.html', context)
+
+    return redirect('transactions:financial_summary')
