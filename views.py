@@ -13,8 +13,58 @@ import logging
 from django.shortcuts import get_object_or_404
 from django.http import Http404
 from django.http import JsonResponse
+from calendar import monthrange
 
 logger = logging.getLogger(__name__)
+
+@login_required
+def base(request):
+    today = date.today()
+    future_expenses = Expenditure.objects.filter(date__gt=today)
+    
+    for expense in future_expenses:
+        # Esempio: Se la data è entro una settimana dalla data odierna, considera la spesa urgente
+        if (expense.date - today).days <= 7:
+            expense.is_urgent = True
+
+    # Gestione dei BankAccount
+    try:
+        bank_accounts = BankAccount.objects.all()
+    except Cash.DoesNotExist:
+        bank_accounts = []
+
+    # Gestione dei Cash
+    try:
+        cash_amounts = Cash.objects.all()
+    except Cash.DoesNotExist:
+        cash_amounts = []
+
+    # Gestione dei Portfolio
+    try:
+        portfolios = Portfolio.objects.all()
+    except Portfolio.DoesNotExist:
+        portfolios = []
+
+    # Calcola il totale dei risparmi
+    total_savings = sum([account.balance for account in bank_accounts]) + sum([cash.amount for cash in cash_amounts]) + sum([portfolio.total_value for portfolio in portfolios])
+
+    # aggiungi i form
+    add_bank_form = AddBankForm()
+    add_cash_form = AddCashAmountForm()
+
+
+    context = {
+        'future_expenses':future_expenses,
+        'cash_amounts':cash_amounts,
+        'bank_accounts': bank_accounts,
+        'portfolios' : portfolios,
+        'total_savings': total_savings,
+        'add_bank_form': add_bank_form,
+        'add_cash_form': add_cash_form,
+        
+    }
+    
+    return render(request, 'transactions/overview.html', context)
 
 
 # Create your views here.
@@ -107,16 +157,9 @@ def financial_summary(request):
         html_line_expenditure = "No expenditure data available"
 
 
-    # logger.debug("start_date: %s", start_date)
-    # logger.debug("end_date: %s", end_date)
-    # logger.debug("incomes: %s", incomes)
-    # logger.debug("expenditures: %s", expenditures)
-    # logger.debug("incomes_df: %s", incomes_df)
-    # logger.debug("expenditures_df: %s", expenditures_df)
-
      # Ottieni gli account bancari e l'entità Cash dal database
     bank_accounts = BankAccount.objects.all()
-    cash_entity = Cash.objects.all()[0]  # Assumendo che ci sia solo un oggetto Cash nel database
+    cash_entity = Cash.objects.first() # Assumendo che ci sia solo un oggetto Cash nel database
 
     income_choices = Income.Choices
     expenditure_choices = Expenditure.Choices
@@ -226,39 +269,11 @@ def transaction_registration(request):
 
 
 @login_required
-def base(request):
-    today = date.today()
-    future_expenses = Expenditure.objects.filter(date__gt=today)
-    
-    for expense in future_expenses:
-        # Esempio: Se la data è entro una settimana dalla data odierna, considera la spesa urgente
-        if (expense.date - today).days <= 7:
-            expense.is_urgent = True
-
-    bank_accounts = BankAccount.objects.all()
-    cash = Cash.objects.first()
-    if cash is not None:
-        total_savings = sum([account.balance for account in bank_accounts]) + cash.amount
-    else:
-        total_savings = sum([account.balance for account in bank_accounts]) 
-
-    add_bank_form = AddBankForm()
-    context = {
-        'future_expenses':future_expenses,
-        'cash':cash,
-        'bank_accounts': bank_accounts,
-        'total_savings': total_savings,
-        'add_bank_form': add_bank_form,
-        
-    }
-    
-    return render(request, 'transactions/overview.html', context)
-
-@login_required
 def bank_detail(request, pk):
     bank_account = get_object_or_404(BankAccount, pk=pk)
     bank_accounts = BankAccount.objects.exclude(pk=pk)
-
+    cash_amounts = Cash.objects.all()
+    
     if request.method == 'POST':
         if 'transfer_button' in request.POST:
             target_account_name = request.POST.get('target_account')
@@ -275,7 +290,7 @@ def bank_detail(request, pk):
                 )
 
             try:
-                target_account = BankAccount.objects.get(bank_name=target_account_name)
+                target_account = BankAccount.objects.get(name=target_account_name)
             except BankAccount.DoesNotExist:
                 raise Http404("L'account bancario di destinazione non esiste.")
 
@@ -285,6 +300,8 @@ def bank_detail(request, pk):
                 messages.error(request, 'Il trasferimento non è riuscito.')
 
         elif 'retire_button' in request.POST:
+            target_account_id = request.POST.get('target_account')
+            
             retire_amount = Decimal(request.POST.get('retire_amount'))
             retire_commission = Decimal(request.POST.get('retire_commission'))
             # crea una expenditure per la commissione
@@ -295,7 +312,14 @@ def bank_detail(request, pk):
                 bank_account=bank_account,
                 description='commissione',
                 )
-            if bank_account.withdraw_money(retire_amount, retire_commission):
+            
+            try:
+                target_account = Cash.objects.get(pk=target_account_id)
+            except Cash.DoesNotExist:
+                raise Http404("L'ammontare di denaro di destinazione non esiste.")
+
+
+            if bank_account.withdraw_money(target_account, retire_amount, retire_commission):
                 messages.success(request, 'Il ritiro è avvenuto con successo.')
             else:
                 messages.error(request, 'Il ritiro non è riuscito.')
@@ -319,9 +343,12 @@ def bank_detail(request, pk):
         # DataFrame vuoto, imposta html_fig a una stringa vuota o un messaggio di avviso
         html_fig = "<p class='m-4'>No record to show</p>"
 
+    
+
     context = {
         'bank_account': bank_account, 
         'bank_accounts': bank_accounts,
+        'cash_amounts': cash_amounts,
         'html_fig':html_fig,
     }
 
@@ -332,13 +359,30 @@ def add_bank(request):
     if request.method == 'POST':
         bank_form = AddBankForm(request.POST)
         if bank_form.is_valid():
-            bank_name = bank_form.cleaned_data['bank_name']
+            name = bank_form.cleaned_data['name']
             balance = bank_form.cleaned_data['balance']
             start_date = bank_form.cleaned_data['start_date']
 
             BankAccount.objects.create(
-                bank_name = bank_name,
+                name = name,
                 balance = balance,
+                start_date = start_date,
+            )
+
+
+    return redirect("transactions:base")
+
+@login_required
+def add_cash_amount(request):
+    if request.method == 'POST':
+        cash_form = AddCashAmountForm(request.POST)
+        if cash_form.is_valid():
+            
+            amount = cash_form.cleaned_data['amount']
+            start_date = cash_form.cleaned_data['start_date']
+
+            Cash.objects.create(
+                amount = amount,
                 start_date = start_date,
             )
 
@@ -403,7 +447,6 @@ def cash_detail(request, pk):
         }
 
     return render(request, 'transactions/cash_detail.html', context)
-
 
 
 @login_required
@@ -510,3 +553,194 @@ def create_recurring_transaction(request):
 
 
     return redirect('transactions:financial_summary')
+
+
+def create_portfolio(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        start_date = request.POST.get('start_date')  # Assicurati che il form abbia un campo 'start_date'
+        balance = request.POST.get('balance')
+                
+        
+        # Crea un nuovo portfolio
+        portfolio = Portfolio.objects.create(
+            name=name, 
+            start_date=start_date,
+            balance = balance
+            )
+
+        # Reindirizza alla pagina di dettaglio del nuovo portfolio
+        return redirect('transactions:portfolio_details', pk=portfolio.pk)
+
+    # Se il metodo non è POST, visualizza il form per la creazione
+    return render(request, 'transactions/create_portfolio.html')
+
+
+def eliminate_portfolio(request, pk):
+                    
+    # elimina portfolio
+    Portfolio.objects.filter(pk=pk).delete()
+
+    # Reindirizza alla pagina iniziale
+    return redirect('transactions:base')
+
+
+def portfolio_details(request, pk):
+    '''
+    Gives an overview of the portfolio
+    '''
+    form_stocks = TransactionStockForm()
+    form_cash = ManageCashForm()
+    portfolio = Portfolio.objects.get(pk=pk)
+    
+    context={
+        "portfolio":portfolio,
+        'companies': Company.objects.all(),  # Aggiungi le aziende disponibili
+        'form_stocks':form_stocks,
+        'form_cash':form_cash,
+    }
+
+    return render(request, 'transactions/portfolio.html', context)
+
+
+def manage_stock(request, pk):
+    portfolio = get_object_or_404(Portfolio, pk=pk)
+
+    if request.method == 'POST':
+        form = TransactionStockForm(request.POST)
+
+        if form.is_valid():
+            company_name = form.cleaned_data['company']
+            quantity = form.cleaned_data['quantity']
+            price = form.cleaned_data['price']
+            commission = form.cleaned_data['commission']
+            date = form.cleaned_data['transaction_date']
+            transaction_type = form.cleaned_data['transaction_type']
+
+            if transaction_type == 'BUY':
+                company = get_object_or_404(Company, name=company_name)
+                total_purchase_cost = (quantity * price) + commission
+
+                if total_purchase_cost <= portfolio.cash_balance:
+                    try:
+                        stock = StockInPortfolio.objects.get(related_portfolio=portfolio, company=company)
+                    except StockInPortfolio.DoesNotExist:
+                        stock = None
+
+                    if stock:
+                        stock.quantity += quantity
+                        stock.price = (stock.price + price) / 2
+                        stock.save()
+                    else:
+                        stock = StockInPortfolio.objects.create(
+                            related_portfolio=portfolio,
+                            company=company,
+                            quantity=quantity,
+                            price=price,
+                        )
+
+                    StockTransaction.objects.create(
+                        stock=stock,
+                        transaction_type='BUY',
+                        quantity=quantity,
+                        price=price,
+                        commission=commission,
+                        transaction_date=date
+                    )
+
+                    # Aggiornamento dei valori del portafoglio
+                    portfolio.cash_balance -= total_purchase_cost
+                    tot_stock_val = 0
+                    for stock in StockInPortfolio.objects.filter(related_portfolio=portfolio):
+                        tot_stock_val = stock.quantity * stock.price
+                    portfolio.stock_value = tot_stock_val
+                    portfolio.total_value = portfolio.cash_balance + portfolio.stock_value
+                    portfolio.save()
+
+                else:
+                    messages.error(request, 'Fondi insufficienti per acquistare queste azioni.')
+            
+            else: # transaction_type == 'SELL'
+                
+                company = get_object_or_404(StockInPortfolio, company__name=company_name, related_portfolio=portfolio)
+                
+                if quantity <= company.quantity:
+                    company.quantity -= quantity
+                    company.save()
+
+                    StockTransaction.objects.create(
+                        stock=company,
+                        transaction_type='SELL',
+                        quantity=quantity,
+                        price=price,
+                        commission=commission,
+                        transaction_date=date
+                    )
+
+                    # Aggiornamento dei valori del portafoglio
+                    portfolio.cash_balance += (quantity * price - commission)
+                    tot_stock_val = 0
+                    for stock in StockInPortfolio.objects.filter(related_portfolio=portfolio):
+                        tot_stock_val = stock.quantity * stock.price
+                    portfolio.stock_value = tot_stock_val
+                    portfolio.total_value = portfolio.cash_balance + portfolio.stock_value
+                    portfolio.save()
+
+                    # Se la quantità rimanente è zero, elimina l'oggetto StockInPortfolio
+                    if company.quantity == 0:
+                       company.delete()
+
+                else:
+                    messages.error(request, 'La quantità venduta supera la quantità disponibile.')
+
+
+    else:
+        form = TransactionStockForm()
+
+    context = {
+        'portfolio': portfolio,
+        'companies': Company.objects.all(),
+        'form_stocks': form,
+        'form_cash': ManageCashForm(),
+    }
+
+    return render(request, 'transactions/portfolio.html', context)
+
+
+def manage_cash(request, pk):
+    portfolio = get_object_or_404(Portfolio, pk=pk)
+
+    if request.method == 'POST':
+        form = ManageCashForm(request.POST)
+
+        if form.is_valid():
+            amount = form.cleaned_data['amount']
+            transaction_type = form.cleaned_data['transaction_type']
+            commission = form.cleaned_data['commission']
+
+            if transaction_type == 'DEPOSIT':
+                portfolio.cash_balance += (amount - commission)
+                portfolio.total_investment += (amount - commission)
+            elif transaction_type == 'WITHDRAW':
+                if (amount + commission) <= portfolio.cash_balance:
+                    portfolio.cash_balance -= (amount + commission)
+                    portfolio.total_investment -= (amount + commission)  # Aggiornamento dell'investimento iniziale
+                else:
+                    messages.error(request, 'La quantità richiesta supera la quantità disponibile.')
+
+            portfolio.total_value = portfolio.cash_balance + portfolio.stock_value
+            portfolio.save()
+
+    else:
+        form = ManageCashForm()
+
+    context = {
+        'portfolio': portfolio,
+        'companies': Company.objects.all(),
+        'form_stocks': TransactionStockForm(),
+        'form_cash': form,
+    }
+
+    return render(request, 'transactions/portfolio.html', context)
+
+

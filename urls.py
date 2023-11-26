@@ -27,7 +27,18 @@ urlpatterns = [
     path('bank/<int:pk>/', views.bank_detail, name='bank_detail'), 
     path('add_bank/', views.add_bank, name='add_bank'), 
     path('cash/<int:pk>/', views.cash_detail, name='cash_detail'), 
+    path('add_cash_amount/', views.add_cash_amount, name='add_cash_amount'), 
     path('create_recurring_transaction/', views.create_recurring_transaction, name='recurring_transaction'),
+    
+    path('portfolio_details/<int:pk>/', views.portfolio_details, name="portfolio_details"),
+    path('manage_stock/<int:pk>/', views.manage_stock, name='manage_stock'),
+    path('create_portfolio/', views.create_portfolio, name="create_portfolio"),
+    path('eliminate_portfolio/<int:pk>/', views.eliminate_portfolio, name="eliminate_portfolio"),
+    path('portfolio/<int:pk>/manage_cash/', views.manage_cash, name='manage_cash'),
+
+
+
+
     #add the next two on main url file
     #path('login/', auth_views.LoginView.as_view(), name='login'),
     #path('logout/', auth_views.LogoutView.as_view(), name='logout'),

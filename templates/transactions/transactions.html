@@ -2,7 +2,16 @@
 
 {% block title %}Transactions{% endblock %}
 {% block content %}
+<style>
 
+/* Stile personalizzato per il colore arancione del bottone */
+.btn-custom {
+    color: #000; /* Testo nero */
+    background-color: #FFD180; /* Colore arancione personalizzato */
+    border-color: #FFD180; /* Colore del bordo */
+}
+
+</style>
 
 <div id="notification-container" class="position-fixed top-0 end-0 p-3" style="z-index: 5">
   {% if messages %}
@@ -17,12 +26,16 @@
 
 <div class="container p-0">
 
-    <h1 class="text-center">Dashboard</h1>
+    <div class="d-flex flex-row m-4 justify-content-between">
+        <h1 class="text-center">Dashboard</h1>
+        <a href="{% url 'transactions:base' %}" class="btn btn-custom ">< Back to Main Page</a>
+    </div>
     
-    <div class="container d-flex flex-row justify-content-around" id="navbar-controls">
+    
+    <div class=" card my-3 container d-flex flex-row justify-content-around" id="navbar-controls">
         <div class="">
             <!-- Button per aprire il form income-->
-            <button class="btn btn-primary mt-3" type="button" data-bs-toggle="modal" data-bs-target="#addIncomeModal" >
+            <button class="btn btn-custom m-2" type="button" data-bs-toggle="modal" data-bs-target="#addIncomeModal" >
                 Add Income
             </button>
             <!-- Modal per l'aggiunta di un Income -->
@@ -62,7 +75,7 @@
                             {{ income_form.cash }}
                         </div>
                         <div class="text-center">
-                            <button type="submit" class="btn btn-primary">Register Income</button>
+                            <button type="submit" class="btn btn-custom">Register Income</button>
                         </div>
                         </form>
                     </div>
@@ -72,7 +85,7 @@
         </div>
         <div class="">
             <!-- Button per aprire il form Expense-->
-            <button class="btn btn-primary mt-3" type="button" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+            <button class="btn btn-custom m-2" type="button" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
                 Add Expense
             </button>
             <!-- Modal per l'aggiunta di una spesa -->
@@ -112,7 +125,7 @@
                             {{ expenditure_form.cash }}
                         </div>
                         <div class="text-center">
-                            <button type="submit" class="btn btn-primary">Register Expense</button>
+                            <button type="submit" class="btn btn-custom">Register Expense</button>
                         </div>
                         </form>
                     </div>
@@ -123,7 +136,7 @@
         </div>
         <div class="">
             <!-- Button per aprire il form recurrent transaction-->
-            <button class="btn btn-primary mt-3" type="button" data-bs-toggle="modal" data-bs-target="#addRecurrentModal">
+            <button class="btn btn-custom m-2" type="button" data-bs-toggle="modal" data-bs-target="#addRecurrentModal">
                 Add Recurrent Transaction
             </button>
             <!-- Modal per l'aggiunta di una transazione ricorrente -->
@@ -203,7 +216,7 @@
                             {% endfor %}
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary">Create Recurring Transaction</button>
+                        <button type="submit" class="btn btn-custom">Create Recurring Transaction</button>
                         </form>
                     </div>
                     </div>
@@ -240,7 +253,7 @@
         <div class="d-lg-flex justify-content-between">
             
             <div class="w-100 d-flex flex-column align-content-center p-2">
-                <button class="btn btn-primary mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#income-div">Toggle Income</button>
+                <button class="btn btn-custom mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#income-div">Toggle Income</button>
                 <div class="collapse" id="income-div">
                     <h2 class="text-center">Income</h2>
                     <table id="income-table" class="table table-bordered table-responsive m-1">
@@ -267,7 +280,7 @@
             </div>
 
             <div class="w-100 d-flex flex-column align-content-center p-2">
-                <button class="btn btn-primary mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#expenses-div">Toggle Expenses</button>
+                <button class="btn btn-custom mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#expenses-div">Toggle Expenses</button>
                 <div class="collapse" id="expenses-div">
                     <h2 class="text-center">Expenses</h2>
                     <table id="expenses-table" class="table table-bordered table-responsive m-1">
@@ -295,10 +308,6 @@
         </div>
     </div>
 
-
-    <div class="fixed-bottom fixed-start p-3">
-        <a href="{% url 'transactions:base' %}" class="btn btn-primary">Back to Main Page</a>
-    </div>
 </div>
 
 <script>

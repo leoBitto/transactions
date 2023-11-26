@@ -3,6 +3,16 @@
 {% block title %}Create Recurring Transaction{% endblock %}
 
 {% block content %}
+<style>
+
+  /* Stile personalizzato per il colore arancione del bottone */
+  .btn-custom {
+      color: #000; /* Testo nero */
+      background-color: #FFD180; /* Colore arancione personalizzato */
+      border-color: #FFD180; /* Colore del bordo */
+  }
+  
+</style>
 <div class="container mt-5">
   <div class="row justify-content-center">
    
@@ -10,10 +20,9 @@
 </div>
 
 <div class="fixed-bottom fixed-start p-3">
-  <a href="{% url 'transactions:base' %}" class="btn btn-primary">Back to Main Page</a>
+  <a href="{% url 'transactions:base' %}" class="btn btn-custom">Back to Main Page</a>
 </div>
 
-<!-- Metti questo script all'interno del tuo file HTML -->
 
 
 

@@ -1,6 +1,11 @@
 from django import forms
 from .models import *
 from django.forms.widgets import SelectDateWidget
+try:
+    from screener.models import Company
+except ModuleNotFoundError:
+    Company = None  # O qualsiasi altro gestore che desideri in caso di mancanza dell'applicazione
+
 
 class RecurringTransactionForm(forms.Form):
     amount = forms.DecimalField(max_digits=10, decimal_places=2)
@@ -40,11 +45,29 @@ class DepositForm(forms.Form):
 
 
 class AddBankForm(forms.Form):
-    bank_name = forms.CharField()
+    name = forms.CharField()
     balance = forms.DecimalField(max_digits=10, decimal_places=2)
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
         
 
+class AddCashAmountForm(forms.Form):
+    amount = forms.DecimalField(max_digits=10, decimal_places=2)
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    
+ 
+class TransactionStockForm(forms.Form):
+    company = forms.ModelChoiceField(queryset=Company.objects.all())
+    quantity = forms.IntegerField()
+    price = forms.DecimalField(max_digits=10, decimal_places=2)
+    commission = forms.DecimalField(max_digits=10, decimal_places=2)
+    transaction_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))  # Aggiunto widget
+    transaction_type = forms.ChoiceField(choices=[('BUY', 'Buy'), ('SELL', 'Sell')])
+
+
+class ManageCashForm(forms.Form):
+    amount = forms.DecimalField(max_digits=10, decimal_places=2)
+    transaction_type = forms.ChoiceField(choices=[('DEPOSIT', 'Deposit'), ('WITHDRAW', 'Withdraw')])
+    commission = forms.DecimalField(max_digits=10, decimal_places=2)
 
 
 
