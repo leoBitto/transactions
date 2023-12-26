@@ -13,22 +13,12 @@
 
 </style>
 
-<div id="notification-container" class="position-fixed top-0 end-0 p-3" style="z-index: 5">
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-primary alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    {% endfor %}
-  {% endif %}
-</div>
 
 <div class="container p-0">
 
     <div class="d-flex flex-row m-4 justify-content-between">
         <h1 class="text-center">Dashboard</h1>
-        <a href="{% url 'transactions:base' %}" class="btn btn-custom ">< Back to Main Page</a>
+        <a href="{% url 'transactions:index' %}" class="btn btn-custom ">< Back to Main Page</a>
     </div>
     
     
@@ -53,6 +43,10 @@
                         <div class="form-group">
                             <label for="{{ income_form.date.id_for_label }}">Date:</label>
                             <input type="date" class="form-control" id="{{ income_form.date.id_for_label }}" name="{{ income_form.date.name }}" value="{{ today }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ income_form.time.id_for_label }}">Time:</label>
+                            <input type="time" class="form-control" id="{{ income_form.time.id_for_label }}" name="{{ income_form.time.name }}" value="{{ now }}">
                         </div>
                         <div class="form-group">
                             <label for="{{ income_form.amount.id_for_label }}">Amount:</label>
@@ -103,6 +97,10 @@
                         <div class="form-group">
                             <label for="{{ expenditure_form.date.id_for_label }}">Date:</label>
                             <input type="date" class="form-control" id="{{ expenditure_form.date.id_for_label }}" name="{{ expenditure_form.date.name }}" value="{{ today }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ expenditure_form.time.id_for_label }}">Time:</label>
+                            <input type="time" class="form-control" id="{{ expenditure_form.time.id_for_label }}" name="{{ expenditure_form.time.name }}" value="{{ now }}">
                         </div>
                         <div class="form-group">
                             <label for="{{ expenditure_form.amount.id_for_label }}">Amount:</label>

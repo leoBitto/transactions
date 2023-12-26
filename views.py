@@ -8,6 +8,7 @@ import plotly.io as pio
 import plotly.graph_objects as go
 from django.contrib import messages
 from datetime import date
+from datetime import datetime
 from decimal import Decimal
 import logging
 from django.shortcuts import get_object_or_404
@@ -18,7 +19,7 @@ from calendar import monthrange
 logger = logging.getLogger(__name__)
 
 @login_required
-def base(request):
+def index(request):
     today = date.today()
     future_expenses = Expenditure.objects.filter(date__gt=today)
     
@@ -61,11 +62,10 @@ def base(request):
         'total_savings': total_savings,
         'add_bank_form': add_bank_form,
         'add_cash_form': add_cash_form,
-        
+
     }
     
     return render(request, 'transactions/overview.html', context)
-
 
 # Create your views here.
 @login_required
@@ -179,13 +179,13 @@ def financial_summary(request):
         'fig_line_expenditure':html_line_expenditure,
         'income_form': IncomeForm(),
         'expenditure_form': ExpenditureForm(),
-        'today': date.today().strftime('%Y-%m-%d')
+        'today': date.today().strftime('%Y-%m-%d'),
+        'now': datetime.now().strftime('%H:%M'),
     }
         
 
     # Restituisci la risposta rendendo il template 'transactions/Transactions.html'
     return render(request, 'transactions/transactions.html', context)
-
 
 @login_required
 def transaction_registration(request):
@@ -193,12 +193,16 @@ def transaction_registration(request):
         income_form = IncomeForm(request.POST)
         expenditure_form = ExpenditureForm(request.POST)
 
+        
+
         if income_form.is_valid():
             # Gestione delle entrate
             income = income_form.save(commit=False)  # Non salvare subito nel database
 
             # Controlla se esiste un guadagno simile nello stesso giorno e dello stesso tipo
             existing_income = Income.objects.filter(date=income.date, type=income.type).first()
+
+            
 
             if existing_income:
                 # Aggiorna l'importo del guadagno esistente
@@ -220,7 +224,13 @@ def transaction_registration(request):
                 cash.amount += Decimal(str(income.amount))
                 cash.save()
 
+            messages.success(request, 'Income saved successfully!')
+
             return redirect('transactions:financial_summary')
+        else:
+            for field, errors in income_form.errors.items():
+                for error in errors:
+                    messages.error(request, f"Error in {field}: {error}")
 
         if expenditure_form.is_valid():
             # Gestione delle spese
@@ -263,10 +273,15 @@ def transaction_registration(request):
                 cash.amount -= Decimal(str(expenditure.amount))
                 cash.save()
 
+            messages.success(request, 'Expenditure saved successfully!')
+
             return redirect('transactions:financial_summary')
+        else:
+            for field, errors in expenditure_form.errors.items():
+                for error in errors:
+                    messages.error(request, f"Error in {field}: {error}")
 
     return redirect('transactions:financial_summary')
-
 
 @login_required
 def bank_detail(request, pk):
@@ -343,7 +358,6 @@ def bank_detail(request, pk):
         # DataFrame vuoto, imposta html_fig a una stringa vuota o un messaggio di avviso
         html_fig = "<p class='m-4'>No record to show</p>"
 
-    
 
     context = {
         'bank_account': bank_account, 
@@ -370,7 +384,7 @@ def add_bank(request):
             )
 
 
-    return redirect("transactions:base")
+    return redirect("transactions:index")
 
 @login_required
 def add_cash_amount(request):
@@ -387,8 +401,7 @@ def add_cash_amount(request):
             )
 
 
-    return redirect("transactions:base")
-
+    return redirect("transactions:index")
 
 @login_required
 def cash_detail(request, pk):
@@ -447,7 +460,6 @@ def cash_detail(request, pk):
         }
 
     return render(request, 'transactions/cash_detail.html', context)
-
 
 @login_required
 def create_recurring_transaction(request):
@@ -554,7 +566,7 @@ def create_recurring_transaction(request):
 
     return redirect('transactions:financial_summary')
 
-
+@login_required
 def create_portfolio(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -575,16 +587,16 @@ def create_portfolio(request):
     # Se il metodo non è POST, visualizza il form per la creazione
     return render(request, 'transactions/create_portfolio.html')
 
-
+@login_required
 def eliminate_portfolio(request, pk):
                     
     # elimina portfolio
     Portfolio.objects.filter(pk=pk).delete()
 
     # Reindirizza alla pagina iniziale
-    return redirect('transactions:base')
+    return redirect('transactions:index')
 
-
+@login_required
 def portfolio_details(request, pk):
     '''
     Gives an overview of the portfolio
@@ -602,7 +614,7 @@ def portfolio_details(request, pk):
 
     return render(request, 'transactions/portfolio.html', context)
 
-
+@login_required
 def manage_stock(request, pk):
     portfolio = get_object_or_404(Portfolio, pk=pk)
 
@@ -706,7 +718,7 @@ def manage_stock(request, pk):
 
     return render(request, 'transactions/portfolio.html', context)
 
-
+@login_required
 def manage_cash(request, pk):
     portfolio = get_object_or_404(Portfolio, pk=pk)
 

@@ -21,7 +21,7 @@ from transactions import views
 
 app_name = 'transactions'
 urlpatterns = [
-    path('', views.base, name='base'),
+    path('', views.index, name='index'),
     path('summary/', views.financial_summary, name='financial_summary'),
     path('register/', views.transaction_registration, name='transaction_registration'),
     path('bank/<int:pk>/', views.bank_detail, name='bank_detail'), 
@@ -35,8 +35,6 @@ urlpatterns = [
     path('create_portfolio/', views.create_portfolio, name="create_portfolio"),
     path('eliminate_portfolio/<int:pk>/', views.eliminate_portfolio, name="eliminate_portfolio"),
     path('portfolio/<int:pk>/manage_cash/', views.manage_cash, name='manage_cash'),
-
-
 
 
     #add the next two on main url file

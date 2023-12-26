@@ -44,7 +44,9 @@ class PortfolioAdmin(admin.ModelAdmin):
     readonly_fields = ('stock_value', 'total_value',)
 
 class StockInPortfolioAdmin(admin.ModelAdmin):
-    list_display = ('company', 'related_portfolio', 'quantity', 'price')
+    list_display = (
+        #'company', 
+        'related_portfolio', 'quantity', 'price')
     search_fields = ('company__name', 'related_portfolio__name')
 
 class StockTransactionAdmin(admin.ModelAdmin):

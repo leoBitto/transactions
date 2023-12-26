@@ -5,7 +5,7 @@ from django.dispatch import receiver
 try:
     from screener.models import Company
 except ModuleNotFoundError:
-    Company = None  # O qualsiasi altro gestore che desideri in caso di mancanza dell'applicazione
+    Company = 'self'  # O qualsiasi altro gestore che desideri in caso di mancanza dell'applicazione
 
 
 class BankAccount(models.Model):
@@ -78,6 +78,7 @@ def log_amount_change(sender, instance, created, **kwargs):
 
 class Transaction(models.Model):
     date = models.DateField()
+    time = models.TimeField()
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.CharField(max_length=100, blank=True, null=True)
     bank_account = models.ForeignKey(BankAccount, null=True, blank=True, on_delete=models.CASCADE)
@@ -89,7 +90,7 @@ class Transaction(models.Model):
     def save(self, *args, **kwargs):
         # Implementa una regola di business (ad esempio, verifica che l'importo sia positivo)
         if self.amount <= 0:
-            raise ValueError("L'importo deve essere maggiore di zero.")
+            raise ValueError("amount must be more than zero.")
         
         super().save(*args, **kwargs)
 
@@ -99,6 +100,8 @@ class Income(Transaction):
         ('Salary','Salary'),
         ('Bonus','Bonus'),
         ('Dividends','Dividends'),
+        ('Freelance', 'Freelance'), 
+        ('Investment', 'Investment'),
         ('Other','Other'),
     ]
     type=models.CharField(choices=Choices, max_length=10)
@@ -117,6 +120,9 @@ class Expenditure(Transaction):
         ('Bills','Bills'),
         ('Trip','Trip'),
         ('Debts','Debts'),
+        ('Entertainment', 'Entertainment'), 
+        ('Education', 'Education'), 
+        ('Clothing', 'Clothing'), 
         ('Other','Other'),
     ]
     type=models.CharField(choices=Choices, max_length=16)
@@ -154,7 +160,7 @@ class PortfolioValueLog(models.Model):
         return f"{self.portfolio.name} - {self.date} - {self.value}"
 
 class StockInPortfolio(models.Model):
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    #company = models.ForeignKey(Company, on_delete=models.CASCADE)
     related_portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE, related_name='stocks')
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
