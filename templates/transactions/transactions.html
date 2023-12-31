@@ -38,7 +38,7 @@
                     </div>
                     <div class="modal-body">
                         <!-- Form for Income Registration -->
-                        <form method="post" action="{% url 'transactions:transaction_registration' %}" class=" col-12 mb-3">
+                        <form method="post" action="{% url 'transactions:income_registration' %}" class=" col-12 mb-3">
                         {% csrf_token %}
                         <div class="form-group">
                             <label for="{{ income_form.date.id_for_label }}">Date:</label>
@@ -77,6 +77,7 @@
                 </div>
             </div>
         </div>
+
         <div class="">
             <!-- Button per aprire il form Expense-->
             <button class="btn btn-custom m-2" type="button" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
@@ -92,7 +93,7 @@
                     </div>
                     <div class="modal-body">
                         <!-- Form per la registrazione della spesa -->
-                        <form method="post" action="{% url 'transactions:transaction_registration' %}" class="mb-3">
+                        <form method="post" action="{% url 'transactions:expense_registration' %}" class="mb-3">
                         {% csrf_token %}
                         <div class="form-group">
                             <label for="{{ expenditure_form.date.id_for_label }}">Date:</label>

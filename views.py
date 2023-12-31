@@ -187,13 +187,11 @@ def financial_summary(request):
     # Restituisci la risposta rendendo il template 'transactions/Transactions.html'
     return render(request, 'transactions/transactions.html', context)
 
+
 @login_required
-def transaction_registration(request):
+def income_registration(request):
     if request.method == 'POST':
         income_form = IncomeForm(request.POST)
-        expenditure_form = ExpenditureForm(request.POST)
-
-        
 
         if income_form.is_valid():
             # Gestione delle entrate
@@ -202,7 +200,6 @@ def transaction_registration(request):
             # Controlla se esiste un guadagno simile nello stesso giorno e dello stesso tipo
             existing_income = Income.objects.filter(date=income.date, type=income.type).first()
 
-            
 
             if existing_income:
                 # Aggiorna l'importo del guadagno esistente
@@ -231,6 +228,15 @@ def transaction_registration(request):
             for field, errors in income_form.errors.items():
                 for error in errors:
                     messages.error(request, f"Error in {field}: {error}")
+
+    return redirect('transactions:financial_summary')
+
+
+@login_required
+def expense_registration(request):
+    if request.method == 'POST':
+        expenditure_form = ExpenditureForm(request.POST)
+
 
         if expenditure_form.is_valid():
             # Gestione delle spese
@@ -282,6 +288,7 @@ def transaction_registration(request):
                     messages.error(request, f"Error in {field}: {error}")
 
     return redirect('transactions:financial_summary')
+
 
 @login_required
 def bank_detail(request, pk):
