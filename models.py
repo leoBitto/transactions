@@ -95,7 +95,7 @@ class Transaction(models.Model):
         super().save(*args, **kwargs)
 
 class Income(Transaction):
-    Choices =[
+    Choices =(
         ('Savings','Savings'),
         ('Salary','Salary'),
         ('Bonus','Bonus'),
@@ -103,14 +103,14 @@ class Income(Transaction):
         ('Freelance', 'Freelance'), 
         ('Investment', 'Investment'),
         ('Other','Other'),
-    ]
+    )
     type=models.CharField(choices=Choices, max_length=10)
 
     def __str__(self):
         return f"Income: {self.amount} on {self.date}"
 
 class Expenditure(Transaction):
-    Choices =[
+    Choices =(
         ('Food','Food'),
         ('Gifts','Gifts'),
         ('Health','Health'),
@@ -124,7 +124,7 @@ class Expenditure(Transaction):
         ('Education', 'Education'), 
         ('Clothing', 'Clothing'), 
         ('Other','Other'),
-    ]
+    )
     type=models.CharField(choices=Choices, max_length=16)
 
     def __str__(self):
